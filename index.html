@@ -1,0 +1,838 @@
+<!-- /mnt/data/index.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tulipanes para mi princesa</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
+
+  <!-- Favicon Corazón Rojo -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50,90 C20,70 10,55 10,40 C10,25 20,15 30,15 C40,15 45,22 50,30 C55,22 60,15 70,15 C80,15 90,25 90,40 C90,55 80,70 50,90 Z' fill='%23ff1493' stroke='%23ff1493' stroke-width='2'/></svg>" type="image/svg+xml" />
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      margin: 0; height: 100vh; overflow: hidden; background: #000;
+      font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    }
+
+    .scene {
+      position: relative; width: 100%; height: 100%; overflow: hidden;
+      display: flex; align-items: center; justify-content: center; color: #fff;
+    }
+
+    /* Fondo realista (se muestra tras la carta) */
+    .scene__bg {
+      position: absolute; inset: 0;
+      background-image: url("./bg-flowers-sky.png");
+      background-size: cover; background-position: center;
+      transform-origin: center; filter: saturate(1.2);
+      opacity: 0; z-index: 0;
+    }
+
+    .scene__overlay {
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at top,
+        rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.6) 55%, rgba(0,0,0,0.9) 100%);
+      pointer-events: none; opacity: 0; z-index: 1;
+    }
+
+    .scene__text {
+      position: absolute; top: 6vh; left: 50%; transform: translateX(-50%);
+      width: 90%; max-width: 650px; text-align: center;
+      font-family: "Playfair Display", serif;
+      font-size: clamp(1.3rem, 2.2vw, 2rem); line-height: 1.35;
+      text-shadow: 0 0 8px rgba(255,255,255,0.9),
+                   0 0 18px rgba(0,255,255,0.5),
+                   0 0 28px rgba(0,150,255,0.5);
+      opacity: 0; z-index: 3;
+    }
+
+    .scene__bouquet-wrapper {
+      position: absolute; bottom: 6vh; left: 50%; transform: translateX(-50%);
+      pointer-events: auto; opacity: 0; z-index: 3;
+    }
+
+    .bouquet {
+      max-width: min(62vw, 360px); height: auto;
+      filter: drop-shadow(0 20px 30px rgba(0,0,0,0.9));
+      transform-origin: 50% 100%; cursor: pointer; touch-action: manipulation; user-select: none;
+    }
+
+    .scene__hint {
+      position: absolute; bottom: 19vh; left: 50%; transform: translateX(-50%);
+      width: 80%; max-width: 400px; text-align: center;
+      font-family: "Playfair Display", serif; font-size: 0.9rem;
+      color: #ffe4f3; text-shadow: 0 0 10px rgba(0,0,0,0.8);
+      opacity: 0; z-index: 3;
+    }
+
+    .scene__extra-message {
+      position: absolute; bottom: 11vh; left: 50%; transform: translateX(-50%);
+      width: 90%; max-width: 520px; text-align: center;
+      font-family: "Playfair Display", serif; font-size: 0.9rem;
+      color: #f7e5f5; text-shadow: 0 0 10px rgba(0,0,0,0.9);
+      opacity: 0; z-index: 3; min-height: 2.7rem;
+    }
+
+    .typewriter {
+      overflow: hidden; border-right: 3px solid #f7e5f5; white-space: nowrap;
+      animation: typewriter-cursor 0.7s infinite;
+    }
+    @keyframes typewriter-cursor { 50% { border-right-color: transparent; } }
+
+    .scene__signature {
+      position: absolute; bottom: 2vh; left: 4vw;
+      font-family: "Playfair Display", serif; font-size: 0.75rem;
+      color: rgba(255,255,255,0.7); text-shadow: 0 0 8px rgba(0,0,0,0.8);
+      opacity: 0; z-index: 3;
+    }
+
+    /* Overlay inicial: carta */
+    .start-overlay {
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at center, #12000c 0%, #000 70%);
+      display: flex; align-items: center; justify-content: center; z-index: 10;
+    }
+    .letter {
+      width: min(90vw, 380px);
+      background: linear-gradient(145deg,#fdf5f5,#f7e5e5);
+      border-radius: 18px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.8), 0 0 25px rgba(255,105,180,0.3);
+      padding: 1.6rem 1.4rem 1.8rem; position: relative; overflow: hidden; transform-origin: center;
+    }
+    .letter::before {
+      content: ""; position: absolute; inset: -40%;
+      background: radial-gradient(circle at 0 0, rgba(255,0,120,0.25), transparent 55%);
+      opacity: 0.7; pointer-events: none;
+    }
+    .letter__title { font-family: "Playfair Display", serif; font-size: 1.2rem; text-align: center; color: #5b1528; margin-bottom: .6rem; }
+    .letter__message { font-size: .95rem; text-align: center; color: #7a2438; margin-bottom: 1.4rem; }
+
+    .start-button {
+      display: block; margin: 0 auto; padding: .9rem 1.8rem; border-radius: 999px;
+      border: 1.2px solid rgba(255,255,255,.8);
+      background: radial-gradient(circle at top left, #ff5f7f, #b0172f);
+      color: #fff; font-family: "Playfair Display", serif; font-size: .9rem;
+      letter-spacing: .08em; text-transform: uppercase; cursor: pointer;
+      box-shadow: 0 0 12px rgba(255,120,150,.9), 0 0 26px rgba(255,120,150,.6);
+      position: relative; overflow: hidden;
+    }
+    .start-button::before { /* brillo real; JS no toca pseudo-elementos */
+      content: ""; position: absolute; top: 0; left: -50%; width: 40%; height: 100%;
+      background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,.9) 45%, transparent 100%);
+      transform: skewX(-20deg);
+      animation: shine 2.8s infinite;
+      opacity: .65;
+    }
+    @keyframes shine {
+      0% { left: -50%; } 50% { left: 110%; } 100% { left: 110%; }
+    }
+
+    /* Estrellas / fugaces / constelaciones */
+    .star, .shooting-star, .constellation-letter { z-index: 2; }
+    .star { position: absolute; border-radius: 50%; background: #fff; opacity: .6; pointer-events: none; }
+
+    .constellation-letter { position: absolute; width: 90px; height: 90px; pointer-events: none; }
+    .constellation-star {
+      position: absolute; width: 6px; height: 6px; border-radius: 50%; background: #fff;
+      box-shadow: 0 0 15px #fff, 0 0 30px rgba(0,200,255,.9), 0 0 45px rgba(0,150,255,.6); opacity: .5;
+    }
+
+    .final-constellation { position: absolute; width: 100%; height: 100%; pointer-events: none; opacity: 0; z-index: 5; }
+    .final-star {
+      position: absolute; width: 6px; height: 6px; background: #fff; border-radius: 50%;
+      box-shadow: 0 0 15px #fff, 0 0 30px rgba(150,220,255,.9), 0 0 50px rgba(100,180,255,.7); opacity: 0;
+    }
+
+    .scene__fadeend {
+      position: absolute; inset: 0; background: #000; opacity: 0; z-index: 9; pointer-events: none;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .fadeend-message {
+      position: absolute; text-align: center; font-family: "Playfair Display", serif;
+      font-size: 2rem; color: #fff; line-height: 1.6;
+      text-shadow: 0 0 20px rgba(255,255,255,.8); opacity: 0; z-index: 10;
+    }
+
+    .shooting-star {
+      position: absolute; width: 180px; height: 3px;
+      background: linear-gradient(to left, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 20%, rgba(255,255,255,.95) 60%, rgba(255,255,255,.8) 100%);
+      border-radius: 999px; filter: blur(1.2px); opacity: 0; pointer-events: none;
+      box-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px rgba(100,200,255,0.6);
+    }
+
+    .particle {
+      position: absolute; width: 10px; height: 10px; border-radius: 999px;
+      background: radial-gradient(circle, #ffffff 0%, #ff8fbf 35%, transparent 70%);
+      pointer-events: none; z-index: 3;
+    }
+
+    .heart {
+      position: absolute; pointer-events: none; z-index: 4;
+      font-size: 2rem; opacity: 1;
+    }
+
+    .firework {
+      position: absolute; pointer-events: none; z-index: 6;
+      width: 8px; height: 8px; border-radius: 50%;
+    }
+
+    .petal {
+      position: absolute; pointer-events: none; z-index: 5;
+      font-size: 1.8rem; opacity: 0.8;
+    }
+
+    .aurora {
+      position: absolute; pointer-events: none; z-index: 2;
+      width: 100%; height: 80px;
+      background: linear-gradient(90deg, transparent, rgba(255,105,180,0.4) 25%, rgba(138,43,226,0.4) 50%, rgba(100,200,255,0.4) 75%, transparent);
+      filter: blur(40px);
+      opacity: 0;
+    }
+
+    .stardust {
+      position: absolute; pointer-events: none; z-index: 1.5;
+      width: 4px; height: 4px; border-radius: 50%;
+      background: radial-gradient(circle, #ffffff, rgba(255,255,255,0.3));
+      box-shadow: 0 0 6px rgba(255,255,255,0.8);
+    }
+
+    .concentric-wave {
+      position: absolute; pointer-events: none; z-index: 1.8;
+      border: 2px solid transparent;
+      border-radius: 50%;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .pulse-bg {
+      position: absolute; pointer-events: none; z-index: 0.5;
+      width: 100%; height: 100%;
+      opacity: 0;
+    }
+
+    .scene__easter-message {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      background: radial-gradient(circle at center, rgba(0,0,0,.6), rgba(0,0,0,.95));
+      text-align: center; padding: 1.6rem; font-family: "Playfair Display", serif;
+      font-size: 1rem; line-height: 1.4; opacity: 0; pointer-events: none; z-index: 8;
+    }
+
+    @media (orientation: landscape) {
+      .bouquet { max-width: min(32vw, 320px); }
+      .scene__text { top: 4vh; }
+      .scene__hint { bottom: 22vh; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="scene" id="scene">
+    <div class="scene__bg" id="bg" aria-hidden="true"></div>
+    <div class="scene__overlay" aria-hidden="true"></div>
+
+    <div class="scene__text" id="romanticText">
+      Estas flores rojas llevan el mismo fuego con el que pienso en ti, te amo mi peruanita
+    </div>
+
+    <div class="scene__bouquet-wrapper" id="bouquetWrapper">
+      <img
+        src="./bouquet-red-tulips.png"
+        alt="Ramo de tulipanes rojos envueltos en papel"
+        class="bouquet"
+        id="bouquet"
+        decoding="async"
+      />
+    </div>
+
+    <div class="scene__hint" id="hint">Toca el ramo mi amol &nbsp;❤️</div>
+
+    <div class="scene__extra-message" id="extraMessage">
+      Si estás leyendo esto, es porque tú eres mi lugar favorito en todo el universoo
+    </div>
+
+    <div class="scene__signature" id="signature">Hecho solo para ti, con amor tu peraunito</div>
+
+    <div class="scene__easter-message" id="easterMessage">
+      Prometo cuidarte y amarte con todo mi corazoncito mi niña, se que va ser dificil pero mientras hagamos las cosas bien
+      y arreglemos nuestros errores juntos, nada ni nadie nos va a separar. Te amo con todo mi ser.
+    </div>
+
+    <div class="scene__easter-message" id="anniversaryMessage" style="background: radial-gradient(circle at center, rgba(255,20,147,.15), rgba(138,43,226,.15)); font-size: 1.3rem; letter-spacing: 0.02em;">
+      ✨ Feliz primer mes de novios mi amor ✨ <br /><br />
+      Cada día contigo es un regalo, gracias por hacerme el hombre más feliz del mundo, aunque me hagas renegar peruana de mierda, tiamoooooo 💕
+    </div>
+
+    <!-- Carta inicial -->
+    <div class="start-overlay" id="startOverlay">
+      <div class="letter" id="letter">
+        <h2 class="letter__title">Para mi peruanita hermosa</h2>
+        <p class="letter__message">Tengo algo para ti.....</p>
+        <button class="start-button" id="startButton" aria-label="Iniciar experiencia">
+          TOCA AQUÍ MI AMOL
+        </button>
+        <small style="display:block;margin-top:.7rem;text-align:center;font-size:.75rem;color:#a33a54;opacity:.9;">
+          Sube el volumen y dejate llevar chuquinuni
+        </small>
+      </div>
+    </div>
+
+    <!-- Audio -->
+    <audio
+      id="bgMusic"
+      src="./Arctic-Monkeys-I-Wanna-Be-Yours-(RawPraise.ng).mp3"
+      preload="auto"
+    ></audio>
+
+    <!-- Fade final -->
+    <div class="scene__fadeend" id="fadeEnd">
+      <div class="fadeend-message" id="fadeEndMsg">TE AMO MI NIÑA<br />ESPERO QUE TE HAYA GUSTADO</div>
+    </div>
+
+    <div class="final-constellation" id="finalConstellation" aria-hidden="true"></div>
+  </div>
+
+  <script>
+    "use strict";
+
+    function initApp() {
+      if (typeof gsap === "undefined") { setTimeout(initApp, 100); return; }
+
+      const scene = document.getElementById("scene");
+      const bg = document.getElementById("bg");
+      const overlay = document.querySelector(".scene__overlay");
+      const text = document.getElementById("romanticText");
+      const bouquet = document.getElementById("bouquet");
+      const bouquetWrapper = document.getElementById("bouquetWrapper");
+      const startOverlay = document.getElementById("startOverlay");
+      const startButton = document.getElementById("startButton");
+      const letter = document.getElementById("letter");
+      const bgMusic = document.getElementById("bgMusic");
+      const extraMessage = document.getElementById("extraMessage");
+      const signature = document.getElementById("signature");
+      const easterMessage = document.getElementById("easterMessage");
+      const anniversaryMessage = document.getElementById("anniversaryMessage");
+      const hint = document.getElementById("hint");
+      const fadeEnd = document.getElementById("fadeEnd");
+      const fadeEndMsg = document.getElementById("fadeEndMsg");
+      const finalConstellation = document.getElementById("finalConstellation");
+
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      // ---- Final cuando termina la música (listener único)
+      function onMusicEnd() {
+        gsap.to(fadeEnd, { opacity: 1, duration: 7, ease: "power3.inOut" });
+        gsap.to(fadeEndMsg, { opacity: 1, duration: 3, delay: 6, ease: "power2.out" });
+
+        gsap.to(
+          [bg, text, bouquetWrapper, extraMessage, signature, ".star", ".shooting-star", ".constellation-letter", finalConstellation],
+          { opacity: 0, duration: 5, ease: "power2.inOut" }
+        );
+      }
+      bgMusic.addEventListener("ended", onMusicEnd, { once: true });
+
+      // ---- Carta: entrada suave
+      gsap.from(letter, { scale: 0.8, opacity: 0, y: 40, duration: 1.1, ease: "back.out(1.5)" });
+      // Latido del botón (por qué: foco visual)
+      gsap.to(startButton, { scale: 1.05, duration: 1.2, repeat: -1, yoyo: true, ease: "sine.inOut" });
+      gsap.to(startButton, { boxShadow: "0 0 22px rgba(255,120,150,1), 0 0 40px rgba(255,120,150,0.9)", duration: 1.8, repeat: -1, yoyo: true, ease: "sine.inOut" });
+
+      // ---- Escena principal
+      function animateText() {
+        gsap.fromTo(text, { y: -40, opacity: 0 }, { y: 0, opacity: 1, duration: 1.8, ease: "power3.out" });
+        if (!reduced) {
+          gsap.to(text, {
+            duration: 2.6,
+            textShadow: "0 0 16px rgba(255,255,255,1), 0 0 30px rgba(0,255,255,0.8), 0 0 50px rgba(0,150,255,0.7)",
+            repeat: -1, yoyo: true, ease: "sine.inOut"
+          });
+        }
+      }
+
+      function animateBouquet() {
+        gsap.to(bouquetWrapper, { opacity: 1, duration: 1.2, ease: "power2.out" });
+        if (!reduced) {
+          gsap.to(bouquet, { y: -16, duration: 2.8, ease: "sine.inOut", repeat: -1, yoyo: true });
+          gsap.to(bouquet, { rotation: 2.5, duration: 4, ease: "sine.inOut", repeat: -1, yoyo: true, transformOrigin: "50% 100%" });
+        }
+      }
+
+      function parallaxMove(xNorm, yNorm) {
+        const moveX = (xNorm - 0.5) * 24;
+        const moveY = (yNorm - 0.5) * 18;
+
+        gsap.to(bg, { x: -moveX, y: -moveY, scale: 1.04, duration: 0.8, ease: "sine.out" });
+        gsap.to(bouquet, { x: moveX * 0.4, duration: 0.8, ease: "sine.out" });
+      }
+
+      scene.addEventListener("mousemove", (e) => {
+        const rect = scene.getBoundingClientRect();
+        parallaxMove((e.clientX - rect.left) / rect.width, (e.clientY - rect.top) / rect.height);
+      });
+
+      scene.addEventListener("touchmove", (e) => {
+        const t = e.touches[0];
+        const rect = scene.getBoundingClientRect();
+        parallaxMove((t.clientX - rect.left) / rect.width, (t.clientY - rect.top) / rect.height);
+      }, { passive: true });
+
+      function createStars(count = 90) {
+        for (let i = 0; i < count; i++) {
+          const s = document.createElement("div");
+          s.className = "star";
+          const size = Math.random() * 2 + 1;
+          s.style.width = `${size}px`;
+          s.style.height = `${size}px`;
+          s.style.left = `${Math.random() * 100}%`;
+          s.style.top = `${Math.random() * 55}%`;
+          s.style.opacity = Math.random() * 0.8 + 0.2;
+          scene.appendChild(s);
+
+          if (!reduced) {
+            gsap.to(s, {
+              opacity: Math.random(),
+              duration: 2 + Math.random() * 3,
+              repeat: -1, yoyo: true, ease: "sine.inOut", delay: Math.random() * 3
+            });
+          }
+        }
+      }
+
+      function createConstellationANTO() {
+        // Función desactivada - constellaciones removidas
+      }
+
+      function createShootingStar() {
+        const s = document.createElement("div");
+        s.className = "shooting-star";
+        scene.appendChild(s);
+
+        const startX = window.innerWidth * (0.2 + Math.random() * 0.6);
+        const startY = window.innerHeight * (0.05 + Math.random() * 0.4);
+        const angle = -30 + Math.random() * -30; // Más ángulo realista
+
+        gsap.set(s, { x: startX, y: startY, rotation: angle, opacity: 0 });
+        gsap.to(s, {
+          opacity: 0.8, duration: 0.15,
+          onComplete: () => {
+            gsap.to(s, {
+              x: startX - 500 - Math.random() * 200, 
+              y: startY + 300 + Math.random() * 200, 
+              opacity: 0, 
+              duration: 1.8 + Math.random() * 0.5, 
+              ease: "power1.out",
+              onComplete: () => s.remove()
+            });
+          }
+        });
+      }
+
+      function createParticles(x, y) {
+        const count = 12;
+        for (let i = 0; i < count; i++) {
+          const p = document.createElement("div");
+          p.className = "particle";
+          scene.appendChild(p);
+
+          const offsetX = (Math.random() - 0.5) * 40;
+          const offsetY = (Math.random() - 0.5) * 40;
+
+          gsap.set(p, { x: x + offsetX, y: y + offsetY, scale: 0.4 + Math.random() * 0.5 });
+          gsap.to(p, {
+            y: "-=70", x: `+=${(Math.random() - 0.5) * 40}`, opacity: 0,
+            duration: 1.2 + Math.random() * 0.6, ease: "power1.out",
+            onComplete: () => p.remove()
+          });
+        }
+      }
+
+      function createHeartRain() {
+        for (let i = 0; i < 25; i++) {
+          const heart = document.createElement("div");
+          heart.className = "heart";
+          heart.textContent = "❤️";
+          heart.style.left = Math.random() * 100 + "%";
+          heart.style.top = "-30px";
+          scene.appendChild(heart);
+
+          const duration = 3 + Math.random() * 2;
+          const startX = parseFloat(heart.style.left);
+          const drift = (Math.random() - 0.5) * 20;
+
+          gsap.to(heart, {
+            y: window.innerHeight + 100,
+            x: drift,
+            opacity: 0,
+            duration: duration,
+            ease: "sine.in",
+            onComplete: () => heart.remove()
+          });
+
+          if (!reduced) {
+            gsap.to(heart, {
+              rotation: Math.random() * 360,
+              duration: duration,
+              ease: "none"
+            }, 0);
+          }
+        }
+      }
+
+      function createPetalRain() {
+        const petals = ["🌹", "🌺", "💐"];
+        for (let i = 0; i < 30; i++) {
+          const petal = document.createElement("div");
+          petal.className = "petal";
+          petal.textContent = petals[Math.floor(Math.random() * petals.length)];
+          petal.style.left = Math.random() * 100 + "%";
+          petal.style.top = "-40px";
+          petal.style.fontSize = (0.8 + Math.random() * 1.5) + "rem";
+          scene.appendChild(petal);
+
+          const duration = 4 + Math.random() * 3;
+          const drift = (Math.random() - 0.5) * 30;
+          const swayAmount = 15 + Math.random() * 25;
+
+          gsap.to(petal, {
+            y: window.innerHeight + 100,
+            x: drift,
+            opacity: 0,
+            duration: duration,
+            ease: "sine.in",
+            onComplete: () => petal.remove()
+          });
+
+          if (!reduced) {
+            gsap.to(petal, {
+              rotation: Math.random() * 720,
+              duration: duration,
+              ease: "none"
+            }, 0);
+
+            gsap.to(petal, {
+              x: swayAmount,
+              duration: 1.5,
+              repeat: Math.floor(duration / 1.5),
+              yoyo: true,
+              ease: "sine.inOut"
+            });
+          }
+        }
+      }
+
+      function createAuroraRomantica() {
+        // Crear múltiples auroras que ondean
+        for (let i = 0; i < 5; i++) {
+          const aurora = document.createElement("div");
+          aurora.className = "aurora";
+          aurora.style.top = (15 + i * 16) + "%";
+          scene.appendChild(aurora);
+
+          const duration = 4 + Math.random() * 2;
+          const delay = i * 0.3;
+
+          gsap.fromTo(aurora, 
+            { opacity: 0, x: -window.innerWidth },
+            { 
+              opacity: 0.6, 
+              x: window.innerWidth,
+              duration: duration, 
+              delay: delay,
+              ease: "power1.inOut",
+              repeat: -1,
+              repeatDelay: 1
+            }
+          );
+        }
+      }
+
+      function createCombinedEffect() {
+        // Ejecuta Aurora + Pétalos simultáneamente
+        if (!reduced) {
+          createAuroraRomantica();
+          createPetalRain();
+        }
+      }
+
+      function createStardustEffect() {
+        // Fase 1 (45-60s): Polvo de estrellas suave
+        for (let i = 0; i < 80; i++) {
+          const dust = document.createElement("div");
+          dust.className = "stardust";
+          dust.style.left = Math.random() * 100 + "%";
+          dust.style.top = Math.random() * 100 + "%";
+          scene.appendChild(dust);
+
+          const duration = 6 + Math.random() * 4;
+          const delay = Math.random() * 0.5;
+
+          gsap.fromTo(dust,
+            { opacity: 0 },
+            { 
+              opacity: 0.8, 
+              y: -50 + Math.random() * -80,
+              x: (Math.random() - 0.5) * 60,
+              duration: duration, 
+              delay: delay,
+              ease: "sine.inOut",
+              onComplete: () => dust.remove()
+            }
+          );
+        }
+      }
+
+      function createConcentricWaves() {
+        // Fase 2 (60-90s): Ondas concéntricas de luz
+        for (let wave = 0; wave < 4; wave++) {
+          const waveEl = document.createElement("div");
+          waveEl.className = "concentric-wave";
+          waveEl.style.borderColor = ["rgba(255,105,180,0.6)", "rgba(138,43,226,0.6)", "rgba(100,200,255,0.6)", "rgba(255,150,200,0.6)"][wave];
+          scene.appendChild(waveEl);
+
+          const delay = wave * 0.4;
+          const duration = 2.5;
+
+          gsap.fromTo(waveEl,
+            { width: "0px", height: "0px", opacity: 1 },
+            { 
+              width: "800px", 
+              height: "800px", 
+              opacity: 0, 
+              duration: duration, 
+              delay: delay,
+              ease: "power2.out",
+              repeat: 3,
+              repeatDelay: 0.8,
+              onComplete: () => waveEl.remove()
+            }
+          );
+        }
+      }
+
+      function createPulseBackground() {
+        // Fase 3 (90-120s): Pulso suave de fondo
+        const pulse = document.createElement("div");
+        pulse.className = "pulse-bg";
+        scene.appendChild(pulse);
+
+        gsap.to(pulse, {
+          background: "radial-gradient(circle at center, rgba(255,105,180,0.15) 0%, rgba(138,43,226,0.1) 50%, rgba(100,200,255,0.05) 100%)",
+          opacity: 0.6,
+          duration: 0.8,
+          repeat: 15,
+          yoyo: true,
+          ease: "sine.inOut",
+          onComplete: () => pulse.remove()
+        });
+      }
+
+      function createEpicCombinedEffect() {
+        // Ejecuta las 3 fases
+        if (!reduced) {
+          // Fase 1: Polvo de estrellas (45-60s) - durará ~15s
+          createStardustEffect();
+          
+          // Fase 2: Ondas concéntricas (60-90s) - durará ~30s
+          setTimeout(() => { createConcentricWaves(); }, 15000);
+          
+          // Fase 3: Pulso de fondo (90-120s) - durará ~30s
+          setTimeout(() => { createPulseBackground(); }, 45000);
+        }
+      }
+
+      function createFireworks(centerX, centerY) {
+        const colors = ["#ff6b9d", "#ff8fbf", "#ffc0d9", "#ff1493", "#ff69b4"];
+        const particleCount = 80;
+
+        for (let i = 0; i < particleCount; i++) {
+          const fw = document.createElement("div");
+          fw.className = "firework";
+          const color = colors[Math.floor(Math.random() * colors.length)];
+          fw.style.background = color;
+          fw.style.boxShadow = `0 0 10px ${color}`;
+          scene.appendChild(fw);
+
+          const angle = (Math.PI * 2 * i) / particleCount;
+          const velocity = 5 + Math.random() * 8;
+          const vx = Math.cos(angle) * velocity;
+          const vy = Math.sin(angle) * velocity;
+
+          gsap.set(fw, { x: centerX, y: centerY, opacity: 1 });
+          gsap.to(fw, {
+            x: centerX + vx * 100,
+            y: centerY + vy * 100,
+            opacity: 0,
+            duration: 1.5 + Math.random() * 0.8,
+            ease: "power2.out",
+            onComplete: () => fw.remove()
+          });
+        }
+      }
+
+      function bouquetPulse(globalX, globalY) {
+        gsap.fromTo(bouquet, { scale: 1 }, { scale: 1.08, duration: 0.2, yoyo: true, repeat: 1, ease: "power2.out" });
+        const rect = scene.getBoundingClientRect();
+        createParticles(globalX - rect.left, globalY - rect.top + 10);
+        createHeartRain();
+      }
+
+      function showEasterEgg() {
+        gsap.killTweensOf(easterMessage);
+        easterMessage.style.pointerEvents = "auto";
+        gsap.fromTo(easterMessage, { opacity: 0 }, { opacity: 1, duration: 0.7, ease: "power2.out" });
+        gsap.to(easterMessage, {
+          opacity: 0, duration: 0.7, ease: "power2.in", delay: 15,
+          onComplete: () => { 
+            easterMessage.style.pointerEvents = "none";
+            // Mostrar mensaje de aniversario
+            gsap.killTweensOf(anniversaryMessage);
+            anniversaryMessage.style.pointerEvents = "auto";
+            gsap.fromTo(anniversaryMessage, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 1, ease: "back.out(1.3)" });
+            
+            // Fuegos artificiales en el momento cumbre
+            if (!reduced) {
+              createFireworks(window.innerWidth / 2, window.innerHeight / 2);
+              setTimeout(() => createFireworks(window.innerWidth * 0.3, window.innerHeight * 0.3), 200);
+              setTimeout(() => createFireworks(window.innerWidth * 0.7, window.innerHeight * 0.3), 400);
+            }
+            
+            gsap.to(anniversaryMessage, {
+              opacity: 0, duration: 0.7, ease: "power2.in", delay: 20,
+              onComplete: () => { anniversaryMessage.style.pointerEvents = "none"; }
+            });
+          }
+        });
+      }
+
+      bouquet.addEventListener("click", (e) => { bouquetPulse(e.clientX, e.clientY); showEasterEgg(); });
+      bouquet.addEventListener("touchstart", (e) => {
+        const t = e.touches[0]; bouquetPulse(t.clientX, t.clientY); showEasterEgg();
+      }, { passive: true });
+
+      // ---- Typewriter
+      function typewriterEffect(element, duration = 4000) {
+        const fullText = element.textContent;
+        element.textContent = "";
+        element.classList.add("typewriter");
+        const delayPerChar = duration / fullText.length;
+        let i = 0;
+        (function typeChar() {
+          if (i < fullText.length) {
+            element.textContent += fullText[i++];
+            setTimeout(typeChar, delayPerChar);
+          } else {
+            element.classList.remove("typewriter"); // mantener visible
+          }
+        })();
+      }
+
+      // ---- Start
+      let starsIntervalStarted = false;
+
+      async function startExperience() {
+        startButton.disabled = true;
+
+        bgMusic.volume = 1;
+        bgMusic.currentTime = 0;
+        try { await bgMusic.play(); } catch (_) { /* algunos navegadores bloquean */ }
+
+        if (document.documentElement.requestFullscreen) {
+          try { await document.documentElement.requestFullscreen(); } catch (_) { /* ignorar */ }
+        }
+
+        const tl = gsap.timeline({
+          onComplete: () => { startOverlay.style.display = "none"; startOverlay.style.pointerEvents = "none"; }
+        });
+        tl.to(letter, { y: -40, scale: 1.05, rotation: -2, duration: 0.5, ease: "power2.out" })
+          .to(letter, { y: 60, scale: 0.6, rotation: 8, opacity: 0, duration: 0.6, ease: "power2.in" }, ">-0.1")
+          .to(startOverlay, { opacity: 0, duration: 0.8, ease: "power2.out" }, "<");
+
+        gsap.to([bg, overlay], { opacity: 1, duration: 1, ease: "power2.out", delay: 0.2 });
+
+        animateText();
+        animateBouquet();
+
+        setTimeout(() => {
+          gsap.fromTo(hint, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 1, ease: "power2.out" });
+          gsap.to(hint, { opacity: 0, duration: 1, ease: "power2.in", delay: 8 });
+        }, 7000);
+
+        // 🌹 Aurora Romántica + Lluvia de Pétalos a mitad de la canción (15s)
+        setTimeout(() => {
+          createCombinedEffect();
+        }, 15000);
+
+        setTimeout(() => {
+          gsap.fromTo(extraMessage, { opacity: 0, y: 20 }, {
+            opacity: 1, y: 0, duration: 1.2, ease: "power2.out",
+            onComplete: () => typewriterEffect(extraMessage, 4000)
+          });
+        }, 28000);
+
+        setTimeout(() => {
+          gsap.to(signature, { opacity: 1, duration: 1.5, ease: "power2.out" });
+        }, 35000);
+
+        // ⭐ COMBINACIÓN ÉPICA: Polvo + Ondas + Pulso (45-120s)
+        setTimeout(() => {
+          createEpicCombinedEffect();
+        }, 45000);
+
+        if (!starsIntervalStarted) {
+          starsIntervalStarted = true;
+          createStars();
+          if (!reduced) {
+            setInterval(() => { if (Math.random() > 0.35) createShootingStar(); }, 2000);
+          }
+        }
+      }
+
+      startButton.addEventListener("click", (e) => { e.stopPropagation(); startExperience(); });
+      startOverlay.addEventListener("touchstart", (e) => {
+        if (e.target === startOverlay || e.target === letter) { e.preventDefault(); startExperience(); }
+      }, { passive: false });
+
+      // ---- Constelación final
+      function createFinalConstellation() {
+        const points = [
+          [20,25],[22,25],[24,25],[22,30],
+          [28,25],[28,27],[30,25],[30,27],[30,29],[28,29],
+          [35,29],[36,25],[37,29],[35.6,27],[36.4,27],
+          [42,29],[42,25],[43,26],[44,25],[44,29],
+          [48,26],[49,25],[50,26],[50,28],[49,29],[48,28],
+          [20,40],[20,36],[21,38],[22,36],[22,40],
+          [26,36],[26,40],
+          [31,40],[31,36],[32,38],
+          [35,36],[35,40],
+          [38,36],[39,38],[40,36],[40,40],[38,40],
+          [43,36],[44,36],[45,36],[44,38],[44,40]
+        ];
+
+        finalConstellation.style.opacity = "1";
+        points.forEach((p, i) => {
+          const s = document.createElement("div");
+          s.className = "final-star";
+          s.style.left = p[0] + "%";
+          s.style.top = p[1] + "%";
+          finalConstellation.appendChild(s);
+
+          gsap.to(s, { opacity: 1, duration: 1.4, delay: i * 0.12 + 1, ease: "power2.out" });
+          if (!reduced) {
+            gsap.to(s, { opacity: 0.35, duration: 2 + Math.random(), repeat: -1, yoyo: true, ease: "sine.inOut", delay: i * 0.12 + 2 });
+          }
+        });
+      }
+    }
+
+    initApp();
+  </script>
+</body>
+</html>
